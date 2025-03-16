@@ -1,4 +1,4 @@
-#!/usr/bin/env lua5.3
+#!/usr/bin/env lum5.3
 
 
 -- special marks:
@@ -12,9 +12,9 @@ header = [[
 <html>
 
 <head>
-<title>Lua 5.4 Reference Manual</title>
+<title>Lum 5.4 Reference Manual</title>
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
-<link rel="stylesheet" href="lua.css">
+<link rel="stylesheet" href="lum.css">
 <link rel="stylesheet" href="manual.css">
 </head>
 
@@ -22,8 +22,8 @@ header = [[
 
 <hr>
 <h1>
-<a href="http://www.lua.org/home.html"><img src="logo.gif" alt="[Lua logo]" border="0"></a>
-Lua 5.4 Reference Manual
+<a href="http://www.lua.org/home.html"><img src="logo.gif" alt="[Lum logo]" border="0"></a>
+Lum 5.4 Reference Manual
 </h1>
 
 by Roberto Ierusalimschy, Luiz Henrique de Figueiredo, Waldemar Celes
@@ -47,8 +47,8 @@ if arg[1] == 'port' then
   seefmt = '(ver %s)'
   header = string.gsub(header, "by (.-)\n",
   "%1\n<p>Tradu&ccedil;&atilde;o: S&eacute;rgio Queiroz de Medeiros", 1)
-  header = string.gsub(header, "Lua (%d+.%d+) Reference Manual",
-                               "Manual de Refer&ecirc;ncia de Lua %1")
+  header = string.gsub(header, "Lum (%d+.%d+) Reference Manual",
+                               "Manual de Refer&ecirc;ncia de Lum %1")
   header = string.gsub(header, "All rights reserved",
                                "Todos os direitos reservados")
 end
@@ -206,7 +206,7 @@ local rw = Tag.b
 
 
 
-local function LuaName (name)
+local function LumName (name)
   return Tag.code(name)
 end
 
@@ -268,8 +268,8 @@ local function verb (s)
 end
 
 
-local function lua2link (e)
-  return string.find(e, "luaL?_") and e or "pdf-"..e
+local function lum2link (e)
+  return string.find(e, "lumL?_") and e or "pdf-"..e
 end
 
 
@@ -296,7 +296,7 @@ Cdots = fixed"&middot;&middot;&middot;",
 Close = fixed"}",
 col = Tag.td,
 defid = function (name)
-          local l = lua2link(name)
+          local l = lum2link(name)
           local c = Tag.code(name)
           return anchor(c, l, l, c)
         end,
@@ -317,7 +317,7 @@ x = id,
 itemize = compose(nopara, Tag.ul),
 leq = fixed"&le;",
 Lid = function (s)
-        return makeref(lua2link(s))
+        return makeref(lum2link(s))
       end,
 M = Tag.em,
 N = function (s) return (string.gsub(s, " ", "&nbsp;")) end,
@@ -383,14 +383,14 @@ seeC = function (s)
        end,
 
 seeF = function (s)
-         return string.format(seefmt, makeref(lua2link(s)))
+         return string.format(seefmt, makeref(lum2link(s)))
        end,
 
 APIEntry = function (e)
   local h, name
   h, e = string.match(e, "^%s*(.-)%s*|(.*)$")
-  name = string.match(h, "(luaL?_[%w_]+)%)? +%(") or
-         string.match(h, "luaL?_[%w_]+")
+  name = string.match(h, "(lumL?_[%w_]+)%)? +%(") or
+         string.match(h, "lumL?_[%w_]+")
   local a = anchor(Tag.code(name), name, name, Tag.code(name))
   local apiicmd, ne = string.match(e, "^(.-</span>)(.*)")
 --io.stderr:write(e)
@@ -405,7 +405,7 @@ LibEntry = function (e)
   local h, name
   h, e = string.match(e, "^(.-)|(.*)$")
   name = string.gsub(h, " (.+", "")
-  local l = lua2link(name)
+  local l = lum2link(name)
   local a = anchor(Tag.code(h), l, l, Tag.code(name))
   return Tag.hr() .. Tag.h3(a) .. e
 end,

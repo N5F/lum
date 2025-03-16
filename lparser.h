@@ -1,7 +1,7 @@
 /*
 ** $Id: lparser.h $
-** Lua Parser
-** See Copyright Notice in lua.h
+** Lum Parser
+** See Copyright Notice in lum.h
 */
 
 #ifndef lparser_h
@@ -68,8 +68,8 @@ typedef enum {
 typedef struct expdesc {
   expkind k;
   union {
-    lua_Integer ival;    /* for VKINT */
-    lua_Number nval;  /* for VKFLT */
+    lum_Integer ival;    /* for VKINT */
+    lum_Number nval;  /* for VKFLT */
     TString *strval;  /* for VKSTR */
     int info;  /* for generic use */
     struct {  /* for indexed variables */
@@ -164,10 +164,10 @@ typedef struct FuncState {
 } FuncState;
 
 
-LUAI_FUNC lu_byte luaY_nvarstack (FuncState *fs);
-LUAI_FUNC void luaY_checklimit (FuncState *fs, int v, int l,
+LUMI_FUNC lu_byte lumY_nvarstack (FuncState *fs);
+LUMI_FUNC void lumY_checklimit (FuncState *fs, int v, int l,
                                 const char *what);
-LUAI_FUNC LClosure *luaY_parser (lua_State *L, ZIO *z, Mbuffer *buff,
+LUMI_FUNC LClosure *lumY_parser (lum_State *L, ZIO *z, Mbuffer *buff,
                                  Dyndata *dyd, const char *name, int firstchar);
 
 

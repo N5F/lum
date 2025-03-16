@@ -1,7 +1,7 @@
 /*
 ** $Id: lapi.h $
-** Auxiliary functions from Lua API
-** See Copyright Notice in lua.h
+** Auxiliary functions from Lum API
+** See Copyright Notice in lum.h
 */
 
 #ifndef lapi_h
@@ -12,11 +12,11 @@
 #include "lstate.h"
 
 
-#if defined(LUA_USE_APICHECK)
+#if defined(LUM_USE_APICHECK)
 #include <assert.h>
 #define api_check(l,e,msg)	assert(e)
 #else	/* for testing */
-#define api_check(l,e,msg)	((void)(l), lua_assert((e) && msg))
+#define api_check(l,e,msg)	((void)(l), lum_assert((e) && msg))
 #endif
 
 
@@ -27,12 +27,12 @@
 
 
 /*
-** macros that are executed whenever program enters the Lua core
-** ('lua_lock') and leaves the core ('lua_unlock')
+** macros that are executed whenever program enters the Lum core
+** ('lum_lock') and leaves the core ('lum_unlock')
 */
-#if !defined(lua_lock)
-#define lua_lock(L)	((void) 0)
-#define lua_unlock(L)	((void) 0)
+#if !defined(lum_lock)
+#define lum_lock(L)	((void) 0)
+#define lum_unlock(L)	((void) 0)
 #endif
 
 
@@ -43,7 +43,7 @@
 ** increases its stack space ('L->ci->top.p').
 */
 #define adjustresults(L,nres) \
-    { if ((nres) <= LUA_MULTRET && L->ci->top.p < L->top.p) \
+    { if ((nres) <= LUM_MULTRET && L->ci->top.p < L->top.p) \
 	L->ci->top.p = L->top.p; }
 
 

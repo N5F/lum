@@ -1,7 +1,7 @@
 /*
 ** $Id: llimits.h $
 ** Limits, basic types, and some other 'installation-dependent' definitions
-** See Copyright Notice in lua.h
+** See Copyright Notice in lum.h
 */
 
 #ifndef llimits_h
@@ -12,19 +12,19 @@
 #include <stddef.h>
 
 
-#include "lua.h"
+#include "lum.h"
 
 
 /*
 ** 'l_mem' is a signed integer big enough to count the total memory
-** used by Lua.  (It is signed due to the use of debt in several
+** used by Lum.  (It is signed due to the use of debt in several
 ** computations.)  Usually, 'ptrdiff_t' should work, but we use 'long'
 ** for 16-bit machines.
 */
-#if defined(LUAI_MEM)		/* { external definitions? */
-typedef LUAI_MEM l_mem;
-typedef LUAI_UMEM lu_mem;
-#elif LUAI_IS32INT	/* }{ */
+#if defined(LUMI_MEM)		/* { external definitions? */
+typedef LUMI_MEM l_mem;
+typedef LUMI_UMEM lu_mem;
+#elif LUMI_IS32INT	/* }{ */
 typedef ptrdiff_t l_mem;
 typedef size_t lu_mem;
 #else  /* 16-bit ints */	/* }{ */
@@ -51,11 +51,11 @@ typedef lu_byte TStatus;
 #define MAX_SIZET	((size_t)(~(size_t)0))
 
 /*
-** Maximum size for strings and userdata visible for Lua; should be
-** representable as a lua_Integer and as a size_t.
+** Maximum size for strings and userdata visible for Lum; should be
+** representable as a lum_Integer and as a size_t.
 */
-#define MAX_SIZE	(sizeof(size_t) < sizeof(lua_Integer) ? MAX_SIZET \
-			  : cast_sizet(LUA_MAXINTEGER))
+#define MAX_SIZE	(sizeof(size_t) < sizeof(lum_Integer) ? MAX_SIZET \
+			  : cast_sizet(LUM_MAXINTEGER))
 
 /*
 ** floor of the log2 of the maximum signed value for integral type 't'.
@@ -80,7 +80,7 @@ typedef lu_byte TStatus;
 ** value. (In strict ISO C this may cause undefined behavior, but no
 ** actual machine seems to bother.)
 */
-#if !defined(LUA_USE_C89) && defined(__STDC_VERSION__) && \
+#if !defined(LUM_USE_C89) && defined(__STDC_VERSION__) && \
     __STDC_VERSION__ >= 199901L
 #include <stdint.h>
 #if defined(UINTPTR_MAX)  /* even in C99 this type is optional */
@@ -96,30 +96,30 @@ typedef lu_byte TStatus;
 
 
 
-/* types of 'usual argument conversions' for lua_Number and lua_Integer */
-typedef LUAI_UACNUMBER l_uacNumber;
-typedef LUAI_UACINT l_uacInt;
+/* types of 'usual argument conversions' for lum_Number and lum_Integer */
+typedef LUMI_UACNUMBER l_uacNumber;
+typedef LUMI_UACINT l_uacInt;
 
 
 /*
 ** Internal assertions for in-house debugging
 */
-#if defined LUAI_ASSERT
+#if defined LUMI_ASSERT
 #undef NDEBUG
 #include <assert.h>
-#define lua_assert(c)           assert(c)
+#define lum_assert(c)           assert(c)
 #define assert_code(c)		c
 #endif
 
-#if defined(lua_assert)
+#if defined(lum_assert)
 #else
-#define lua_assert(c)		((void)0)
+#define lum_assert(c)		((void)0)
 #define assert_code(c)		((void)0)
 #endif
 
-#define check_exp(c,e)		(lua_assert(c), (e))
+#define check_exp(c,e)		(lum_assert(c), (e))
 /* to avoid problems with conditions too long */
-#define lua_longassert(c)	assert_code((c) ? (void)0 : lua_assert(0))
+#define lum_longassert(c)	assert_code((c) ? (void)0 : lum_assert(0))
 
 
 /* macro to avoid warnings about unused variables */
@@ -133,7 +133,7 @@ typedef LUAI_UACINT l_uacInt;
 
 #define cast_void(i)	cast(void, (i))
 #define cast_voidp(i)	cast(void *, (i))
-#define cast_num(i)	cast(lua_Number, (i))
+#define cast_num(i)	cast(lum_Number, (i))
 #define cast_int(i)	cast(int, (i))
 #define cast_uint(i)	cast(unsigned int, (i))
 #define cast_ulong(i)	cast(unsigned long, (i))
@@ -144,32 +144,32 @@ typedef LUAI_UACINT l_uacInt;
 #define cast_sizet(i)	cast(size_t, (i))
 
 
-/* cast a signed lua_Integer to lua_Unsigned */
+/* cast a signed lum_Integer to lum_Unsigned */
 #if !defined(l_castS2U)
-#define l_castS2U(i)	((lua_Unsigned)(i))
+#define l_castS2U(i)	((lum_Unsigned)(i))
 #endif
 
 /*
-** cast a lua_Unsigned to a signed lua_Integer; this cast is
+** cast a lum_Unsigned to a signed lum_Integer; this cast is
 ** not strict ISO C, but two-complement architectures should
 ** work fine.
 */
 #if !defined(l_castU2S)
-#define l_castU2S(i)	((lua_Integer)(i))
+#define l_castU2S(i)	((lum_Integer)(i))
 #endif
 
 /*
-** cast a size_t to lua_Integer: These casts are always valid for
-** sizes of Lua objects (see MAX_SIZE)
+** cast a size_t to lum_Integer: These casts are always valid for
+** sizes of Lum objects (see MAX_SIZE)
 */
-#define cast_st2S(sz)	((lua_Integer)(sz))
+#define cast_st2S(sz)	((lum_Integer)(sz))
 
 /* Cast a ptrdiff_t to size_t, when it is known that the minuend
 ** comes from the subtrahend (the base)
 */
 #define ct_diff2sz(df)	((size_t)(df))
 
-/* ptrdiff_t to lua_Integer */
+/* ptrdiff_t to lum_Integer */
 #define ct_diff2S(df)	cast_st2S(ct_diff2sz(df))
 
 /*
@@ -210,7 +210,7 @@ typedef void (*voidf)(void);
 /*
 ** Inline functions
 */
-#if !defined(LUA_USE_C89)
+#if !defined(LUM_USE_C89)
 #define l_inline	inline
 #elif defined(__GNUC__)
 #define l_inline	__inline__
@@ -224,7 +224,7 @@ typedef void (*voidf)(void);
 /*
 ** An unsigned with (at least) 4 bytes
 */
-#if LUAI_IS32INT
+#if LUMI_IS32INT
 typedef unsigned int l_uint32;
 #else
 typedef unsigned long l_uint32;
@@ -232,17 +232,17 @@ typedef unsigned long l_uint32;
 
 
 /*
-** The luai_num* macros define the primitive operations over numbers.
+** The lumi_num* macros define the primitive operations over numbers.
 */
 
 /* floor division (defined as 'floor(a/b)') */
-#if !defined(luai_numidiv)
-#define luai_numidiv(L,a,b)     ((void)L, l_floor(luai_numdiv(L,a,b)))
+#if !defined(lumi_numidiv)
+#define lumi_numidiv(L,a,b)     ((void)L, l_floor(lumi_numdiv(L,a,b)))
 #endif
 
 /* float division */
-#if !defined(luai_numdiv)
-#define luai_numdiv(L,a,b)      ((a)/(b))
+#if !defined(lumi_numdiv)
+#define lumi_numdiv(L,a,b)      ((a)/(b))
 #endif
 
 /*
@@ -256,30 +256,30 @@ typedef unsigned long l_uint32;
 ** 'b' with different signs, or 'm' and 'b' with different signs
 ** (as the result 'm' of 'fmod' has the same sign of 'a').
 */
-#if !defined(luai_nummod)
-#define luai_nummod(L,a,b,m)  \
+#if !defined(lumi_nummod)
+#define lumi_nummod(L,a,b,m)  \
   { (void)L; (m) = l_mathop(fmod)(a,b); \
     if (((m) > 0) ? (b) < 0 : ((m) < 0 && (b) > 0)) (m) += (b); }
 #endif
 
 /* exponentiation */
-#if !defined(luai_numpow)
-#define luai_numpow(L,a,b)  \
+#if !defined(lumi_numpow)
+#define lumi_numpow(L,a,b)  \
   ((void)L, (b == 2) ? (a)*(a) : l_mathop(pow)(a,b))
 #endif
 
 /* the others are quite standard operations */
-#if !defined(luai_numadd)
-#define luai_numadd(L,a,b)      ((a)+(b))
-#define luai_numsub(L,a,b)      ((a)-(b))
-#define luai_nummul(L,a,b)      ((a)*(b))
-#define luai_numunm(L,a)        (-(a))
-#define luai_numeq(a,b)         ((a)==(b))
-#define luai_numlt(a,b)         ((a)<(b))
-#define luai_numle(a,b)         ((a)<=(b))
-#define luai_numgt(a,b)         ((a)>(b))
-#define luai_numge(a,b)         ((a)>=(b))
-#define luai_numisnan(a)        (!luai_numeq((a), (a)))
+#if !defined(lumi_numadd)
+#define lumi_numadd(L,a,b)      ((a)+(b))
+#define lumi_numsub(L,a,b)      ((a)-(b))
+#define lumi_nummul(L,a,b)      ((a)*(b))
+#define lumi_numunm(L,a)        (-(a))
+#define lumi_numeq(a,b)         ((a)==(b))
+#define lumi_numlt(a,b)         ((a)<(b))
+#define lumi_numle(a,b)         ((a)<=(b))
+#define lumi_numgt(a,b)         ((a)>(b))
+#define lumi_numge(a,b)         ((a)>=(b))
+#define lumi_numisnan(a)        (!lumi_numeq((a), (a)))
 #endif
 
 
@@ -290,18 +290,18 @@ typedef unsigned long l_uint32;
 */
 
 /* print a string */
-#if !defined(lua_writestring)
-#define lua_writestring(s,l)   fwrite((s), sizeof(char), (l), stdout)
+#if !defined(lum_writestring)
+#define lum_writestring(s,l)   fwrite((s), sizeof(char), (l), stdout)
 #endif
 
 /* print a newline and flush the output */
-#if !defined(lua_writeline)
-#define lua_writeline()        (lua_writestring("\n", 1), fflush(stdout))
+#if !defined(lum_writeline)
+#define lum_writeline()        (lum_writestring("\n", 1), fflush(stdout))
 #endif
 
 /* print an error message */
-#if !defined(lua_writestringerror)
-#define lua_writestringerror(s,p) \
+#if !defined(lum_writestringerror)
+#define lum_writestringerror(s,p) \
         (fprintf(stderr, (s), (p)), fflush(stderr))
 #endif
 

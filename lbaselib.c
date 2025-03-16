@@ -1,11 +1,11 @@
 /*
 ** $Id: lbaselib.c $
 ** Basic library
-** See Copyright Notice in lua.h
+** See Copyright Notice in lum.h
 */
 
 #define lbaselib_c
-#define LUA_LIB
+#define LUM_LIB
 
 #include "lprefix.h"
 
@@ -15,25 +15,25 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "lua.h"
+#include "lum.h"
 
 #include "lauxlib.h"
-#include "lualib.h"
+#include "lumlib.h"
 #include "llimits.h"
 
 
-static int luaB_print (lua_State *L) {
-  int n = lua_gettop(L);  /* number of arguments */
+static int lumB_print (lum_State *L) {
+  int n = lum_gettop(L);  /* number of arguments */
   int i;
   for (i = 1; i <= n; i++) {  /* for each argument */
     size_t l;
-    const char *s = luaL_tolstring(L, i, &l);  /* convert it to string */
+    const char *s = lumL_tolstring(L, i, &l);  /* convert it to string */
     if (i > 1)  /* not the first element? */
-      lua_writestring("\t", 1);  /* add a tab before it */
-    lua_writestring(s, l);  /* print it */
-    lua_pop(L, 1);  /* pop result */
+      lum_writestring("\t", 1);  /* add a tab before it */
+    lum_writestring(s, l);  /* print it */
+    lum_pop(L, 1);  /* pop result */
   }
-  lua_writeline();
+  lum_writeline();
   return 0;
 }
 
@@ -43,23 +43,23 @@ static int luaB_print (lua_State *L) {
 ** Check first for errors; otherwise an error may interrupt
 ** the composition of a warning, leaving it unfinished.
 */
-static int luaB_warn (lua_State *L) {
-  int n = lua_gettop(L);  /* number of arguments */
+static int lumB_warn (lum_State *L) {
+  int n = lum_gettop(L);  /* number of arguments */
   int i;
-  luaL_checkstring(L, 1);  /* at least one argument */
+  lumL_checkstring(L, 1);  /* at least one argument */
   for (i = 2; i <= n; i++)
-    luaL_checkstring(L, i);  /* make sure all arguments are strings */
+    lumL_checkstring(L, i);  /* make sure all arguments are strings */
   for (i = 1; i < n; i++)  /* compose warning */
-    lua_warning(L, lua_tostring(L, i), 1);
-  lua_warning(L, lua_tostring(L, n), 0);  /* close warning */
+    lum_warning(L, lum_tostring(L, i), 1);
+  lum_warning(L, lum_tostring(L, n), 0);  /* close warning */
   return 0;
 }
 
 
 #define SPACECHARS	" \f\n\r\t\v"
 
-static const char *b_str2int (const char *s, unsigned base, lua_Integer *pn) {
-  lua_Unsigned n = 0;
+static const char *b_str2int (const char *s, unsigned base, lum_Integer *pn) {
+  lum_Unsigned n = 0;
   int neg = 0;
   s += strspn(s, SPACECHARS);  /* skip initial spaces */
   if (*s == '-') { s++; neg = 1; }  /* handle sign */
@@ -75,223 +75,223 @@ static const char *b_str2int (const char *s, unsigned base, lua_Integer *pn) {
     s++;
   } while (isalnum(cast_uchar(*s)));
   s += strspn(s, SPACECHARS);  /* skip trailing spaces */
-  *pn = (lua_Integer)((neg) ? (0u - n) : n);
+  *pn = (lum_Integer)((neg) ? (0u - n) : n);
   return s;
 }
 
 
-static int luaB_tonumber (lua_State *L) {
-  if (lua_isnoneornil(L, 2)) {  /* standard conversion? */
-    if (lua_type(L, 1) == LUA_TNUMBER) {  /* already a number? */
-      lua_settop(L, 1);  /* yes; return it */
+static int lumB_tonumber (lum_State *L) {
+  if (lum_isnoneornil(L, 2)) {  /* standard conversion? */
+    if (lum_type(L, 1) == LUM_TNUMBER) {  /* already a number? */
+      lum_settop(L, 1);  /* yes; return it */
       return 1;
     }
     else {
       size_t l;
-      const char *s = lua_tolstring(L, 1, &l);
-      if (s != NULL && lua_stringtonumber(L, s) == l + 1)
+      const char *s = lum_tolstring(L, 1, &l);
+      if (s != NULL && lum_stringtonumber(L, s) == l + 1)
         return 1;  /* successful conversion to number */
       /* else not a number */
-      luaL_checkany(L, 1);  /* (but there must be some parameter) */
+      lumL_checkany(L, 1);  /* (but there must be some parameter) */
     }
   }
   else {
     size_t l;
     const char *s;
-    lua_Integer n = 0;  /* to avoid warnings */
-    lua_Integer base = luaL_checkinteger(L, 2);
-    luaL_checktype(L, 1, LUA_TSTRING);  /* no numbers as strings */
-    s = lua_tolstring(L, 1, &l);
-    luaL_argcheck(L, 2 <= base && base <= 36, 2, "base out of range");
+    lum_Integer n = 0;  /* to avoid warnings */
+    lum_Integer base = lumL_checkinteger(L, 2);
+    lumL_checktype(L, 1, LUM_TSTRING);  /* no numbers as strings */
+    s = lum_tolstring(L, 1, &l);
+    lumL_argcheck(L, 2 <= base && base <= 36, 2, "base out of range");
     if (b_str2int(s, cast_uint(base), &n) == s + l) {
-      lua_pushinteger(L, n);
+      lum_pushinteger(L, n);
       return 1;
     }  /* else not a number */
   }  /* else not a number */
-  luaL_pushfail(L);  /* not a number */
+  lumL_pushfail(L);  /* not a number */
   return 1;
 }
 
 
-static int luaB_error (lua_State *L) {
-  int level = (int)luaL_optinteger(L, 2, 1);
-  lua_settop(L, 1);
-  if (lua_type(L, 1) == LUA_TSTRING && level > 0) {
-    luaL_where(L, level);   /* add extra information */
-    lua_pushvalue(L, 1);
-    lua_concat(L, 2);
+static int lumB_error (lum_State *L) {
+  int level = (int)lumL_optinteger(L, 2, 1);
+  lum_settop(L, 1);
+  if (lum_type(L, 1) == LUM_TSTRING && level > 0) {
+    lumL_where(L, level);   /* add extra information */
+    lum_pushvalue(L, 1);
+    lum_concat(L, 2);
   }
-  return lua_error(L);
+  return lum_error(L);
 }
 
 
-static int luaB_getmetatable (lua_State *L) {
-  luaL_checkany(L, 1);
-  if (!lua_getmetatable(L, 1)) {
-    lua_pushnil(L);
+static int lumB_getmetatable (lum_State *L) {
+  lumL_checkany(L, 1);
+  if (!lum_getmetatable(L, 1)) {
+    lum_pushnil(L);
     return 1;  /* no metatable */
   }
-  luaL_getmetafield(L, 1, "__metatable");
+  lumL_getmetafield(L, 1, "__metatable");
   return 1;  /* returns either __metatable field (if present) or metatable */
 }
 
 
-static int luaB_setmetatable (lua_State *L) {
-  int t = lua_type(L, 2);
-  luaL_checktype(L, 1, LUA_TTABLE);
-  luaL_argexpected(L, t == LUA_TNIL || t == LUA_TTABLE, 2, "nil or table");
-  if (l_unlikely(luaL_getmetafield(L, 1, "__metatable") != LUA_TNIL))
-    return luaL_error(L, "cannot change a protected metatable");
-  lua_settop(L, 2);
-  lua_setmetatable(L, 1);
+static int lumB_setmetatable (lum_State *L) {
+  int t = lum_type(L, 2);
+  lumL_checktype(L, 1, LUM_TTABLE);
+  lumL_argexpected(L, t == LUM_TNIL || t == LUM_TTABLE, 2, "nil or table");
+  if (l_unlikely(lumL_getmetafield(L, 1, "__metatable") != LUM_TNIL))
+    return lumL_error(L, "cannot change a protected metatable");
+  lum_settop(L, 2);
+  lum_setmetatable(L, 1);
   return 1;
 }
 
 
-static int luaB_rawequal (lua_State *L) {
-  luaL_checkany(L, 1);
-  luaL_checkany(L, 2);
-  lua_pushboolean(L, lua_rawequal(L, 1, 2));
+static int lumB_rawequal (lum_State *L) {
+  lumL_checkany(L, 1);
+  lumL_checkany(L, 2);
+  lum_pushboolean(L, lum_rawequal(L, 1, 2));
   return 1;
 }
 
 
-static int luaB_rawlen (lua_State *L) {
-  int t = lua_type(L, 1);
-  luaL_argexpected(L, t == LUA_TTABLE || t == LUA_TSTRING, 1,
+static int lumB_rawlen (lum_State *L) {
+  int t = lum_type(L, 1);
+  lumL_argexpected(L, t == LUM_TTABLE || t == LUM_TSTRING, 1,
                       "table or string");
-  lua_pushinteger(L, l_castU2S(lua_rawlen(L, 1)));
+  lum_pushinteger(L, l_castU2S(lum_rawlen(L, 1)));
   return 1;
 }
 
 
-static int luaB_rawget (lua_State *L) {
-  luaL_checktype(L, 1, LUA_TTABLE);
-  luaL_checkany(L, 2);
-  lua_settop(L, 2);
-  lua_rawget(L, 1);
+static int lumB_rawget (lum_State *L) {
+  lumL_checktype(L, 1, LUM_TTABLE);
+  lumL_checkany(L, 2);
+  lum_settop(L, 2);
+  lum_rawget(L, 1);
   return 1;
 }
 
-static int luaB_rawset (lua_State *L) {
-  luaL_checktype(L, 1, LUA_TTABLE);
-  luaL_checkany(L, 2);
-  luaL_checkany(L, 3);
-  lua_settop(L, 3);
-  lua_rawset(L, 1);
+static int lumB_rawset (lum_State *L) {
+  lumL_checktype(L, 1, LUM_TTABLE);
+  lumL_checkany(L, 2);
+  lumL_checkany(L, 3);
+  lum_settop(L, 3);
+  lum_rawset(L, 1);
   return 1;
 }
 
 
-static int pushmode (lua_State *L, int oldmode) {
+static int pushmode (lum_State *L, int oldmode) {
   if (oldmode == -1)
-    luaL_pushfail(L);  /* invalid call to 'lua_gc' */
+    lumL_pushfail(L);  /* invalid call to 'lum_gc' */
   else
-    lua_pushstring(L, (oldmode == LUA_GCINC) ? "incremental"
+    lum_pushstring(L, (oldmode == LUM_GCINC) ? "incremental"
                                              : "generational");
   return 1;
 }
 
 
 /*
-** check whether call to 'lua_gc' was valid (not inside a finalizer)
+** check whether call to 'lum_gc' was valid (not inside a finalizer)
 */
 #define checkvalres(res) { if (res == -1) break; }
 
-static int luaB_collectgarbage (lua_State *L) {
+static int lumB_collectgarbage (lum_State *L) {
   static const char *const opts[] = {"stop", "restart", "collect",
     "count", "step", "isrunning", "generational", "incremental",
     "param", NULL};
-  static const char optsnum[] = {LUA_GCSTOP, LUA_GCRESTART, LUA_GCCOLLECT,
-    LUA_GCCOUNT, LUA_GCSTEP, LUA_GCISRUNNING, LUA_GCGEN, LUA_GCINC,
-    LUA_GCPARAM};
-  int o = optsnum[luaL_checkoption(L, 1, "collect", opts)];
+  static const char optsnum[] = {LUM_GCSTOP, LUM_GCRESTART, LUM_GCCOLLECT,
+    LUM_GCCOUNT, LUM_GCSTEP, LUM_GCISRUNNING, LUM_GCGEN, LUM_GCINC,
+    LUM_GCPARAM};
+  int o = optsnum[lumL_checkoption(L, 1, "collect", opts)];
   switch (o) {
-    case LUA_GCCOUNT: {
-      int k = lua_gc(L, o);
-      int b = lua_gc(L, LUA_GCCOUNTB);
+    case LUM_GCCOUNT: {
+      int k = lum_gc(L, o);
+      int b = lum_gc(L, LUM_GCCOUNTB);
       checkvalres(k);
-      lua_pushnumber(L, (lua_Number)k + ((lua_Number)b/1024));
+      lum_pushnumber(L, (lum_Number)k + ((lum_Number)b/1024));
       return 1;
     }
-    case LUA_GCSTEP: {
-      lua_Integer n = luaL_optinteger(L, 2, 0);
-      int res = lua_gc(L, o, cast_sizet(n));
+    case LUM_GCSTEP: {
+      lum_Integer n = lumL_optinteger(L, 2, 0);
+      int res = lum_gc(L, o, cast_sizet(n));
       checkvalres(res);
-      lua_pushboolean(L, res);
+      lum_pushboolean(L, res);
       return 1;
     }
-    case LUA_GCISRUNNING: {
-      int res = lua_gc(L, o);
+    case LUM_GCISRUNNING: {
+      int res = lum_gc(L, o);
       checkvalres(res);
-      lua_pushboolean(L, res);
+      lum_pushboolean(L, res);
       return 1;
     }
-    case LUA_GCGEN: {
-      return pushmode(L, lua_gc(L, o));
+    case LUM_GCGEN: {
+      return pushmode(L, lum_gc(L, o));
     }
-    case LUA_GCINC: {
-      return pushmode(L, lua_gc(L, o));
+    case LUM_GCINC: {
+      return pushmode(L, lum_gc(L, o));
     }
-    case LUA_GCPARAM: {
+    case LUM_GCPARAM: {
       static const char *const params[] = {
         "minormul", "majorminor", "minormajor",
         "pause", "stepmul", "stepsize", NULL};
       static const char pnum[] = {
-        LUA_GCPMINORMUL, LUA_GCPMAJORMINOR, LUA_GCPMINORMAJOR,
-        LUA_GCPPAUSE, LUA_GCPSTEPMUL, LUA_GCPSTEPSIZE};
-      int p = pnum[luaL_checkoption(L, 2, NULL, params)];
-      lua_Integer value = luaL_optinteger(L, 3, -1);
-      lua_pushinteger(L, lua_gc(L, o, p, (int)value));
+        LUM_GCPMINORMUL, LUM_GCPMAJORMINOR, LUM_GCPMINORMAJOR,
+        LUM_GCPPAUSE, LUM_GCPSTEPMUL, LUM_GCPSTEPSIZE};
+      int p = pnum[lumL_checkoption(L, 2, NULL, params)];
+      lum_Integer value = lumL_optinteger(L, 3, -1);
+      lum_pushinteger(L, lum_gc(L, o, p, (int)value));
       return 1;
     }
     default: {
-      int res = lua_gc(L, o);
+      int res = lum_gc(L, o);
       checkvalres(res);
-      lua_pushinteger(L, res);
+      lum_pushinteger(L, res);
       return 1;
     }
   }
-  luaL_pushfail(L);  /* invalid call (inside a finalizer) */
+  lumL_pushfail(L);  /* invalid call (inside a finalizer) */
   return 1;
 }
 
 
-static int luaB_type (lua_State *L) {
-  int t = lua_type(L, 1);
-  luaL_argcheck(L, t != LUA_TNONE, 1, "value expected");
-  lua_pushstring(L, lua_typename(L, t));
+static int lumB_type (lum_State *L) {
+  int t = lum_type(L, 1);
+  lumL_argcheck(L, t != LUM_TNONE, 1, "value expected");
+  lum_pushstring(L, lum_typename(L, t));
   return 1;
 }
 
 
-static int luaB_next (lua_State *L) {
-  luaL_checktype(L, 1, LUA_TTABLE);
-  lua_settop(L, 2);  /* create a 2nd argument if there isn't one */
-  if (lua_next(L, 1))
+static int lumB_next (lum_State *L) {
+  lumL_checktype(L, 1, LUM_TTABLE);
+  lum_settop(L, 2);  /* create a 2nd argument if there isn't one */
+  if (lum_next(L, 1))
     return 2;
   else {
-    lua_pushnil(L);
+    lum_pushnil(L);
     return 1;
   }
 }
 
 
-static int pairscont (lua_State *L, int status, lua_KContext k) {
+static int pairscont (lum_State *L, int status, lum_KContext k) {
   (void)L; (void)status; (void)k;  /* unused */
   return 3;
 }
 
-static int luaB_pairs (lua_State *L) {
-  luaL_checkany(L, 1);
-  if (luaL_getmetafield(L, 1, "__pairs") == LUA_TNIL) {  /* no metamethod? */
-    lua_pushcfunction(L, luaB_next);  /* will return generator, */
-    lua_pushvalue(L, 1);  /* state, */
-    lua_pushnil(L);  /* and initial value */
+static int lumB_pairs (lum_State *L) {
+  lumL_checkany(L, 1);
+  if (lumL_getmetafield(L, 1, "__pairs") == LUM_TNIL) {  /* no metamethod? */
+    lum_pushcfunction(L, lumB_next);  /* will return generator, */
+    lum_pushvalue(L, 1);  /* state, */
+    lum_pushnil(L);  /* and initial value */
   }
   else {
-    lua_pushvalue(L, 1);  /* argument 'self' to metamethod */
-    lua_callk(L, 1, 3, 0, pairscont);  /* get 3 values from metamethod */
+    lum_pushvalue(L, 1);  /* argument 'self' to metamethod */
+    lum_callk(L, 1, 3, 0, pairscont);  /* get 3 values from metamethod */
   }
   return 3;
 }
@@ -300,11 +300,11 @@ static int luaB_pairs (lua_State *L) {
 /*
 ** Traversal function for 'ipairs'
 */
-static int ipairsaux (lua_State *L) {
-  lua_Integer i = luaL_checkinteger(L, 2);
-  i = luaL_intop(+, i, 1);
-  lua_pushinteger(L, i);
-  return (lua_geti(L, 1, i) == LUA_TNIL) ? 1 : 2;
+static int ipairsaux (lum_State *L) {
+  lum_Integer i = lumL_checkinteger(L, 2);
+  i = lumL_intop(+, i, 1);
+  lum_pushinteger(L, i);
+  return (lum_geti(L, 1, i) == LUM_TNIL) ? 1 : 2;
 }
 
 
@@ -312,45 +312,45 @@ static int ipairsaux (lua_State *L) {
 ** 'ipairs' function. Returns 'ipairsaux', given "table", 0.
 ** (The given "table" may not be a table.)
 */
-static int luaB_ipairs (lua_State *L) {
-  luaL_checkany(L, 1);
-  lua_pushcfunction(L, ipairsaux);  /* iteration function */
-  lua_pushvalue(L, 1);  /* state */
-  lua_pushinteger(L, 0);  /* initial value */
+static int lumB_ipairs (lum_State *L) {
+  lumL_checkany(L, 1);
+  lum_pushcfunction(L, ipairsaux);  /* iteration function */
+  lum_pushvalue(L, 1);  /* state */
+  lum_pushinteger(L, 0);  /* initial value */
   return 3;
 }
 
 
-static int load_aux (lua_State *L, int status, int envidx) {
-  if (l_likely(status == LUA_OK)) {
+static int load_aux (lum_State *L, int status, int envidx) {
+  if (l_likely(status == LUM_OK)) {
     if (envidx != 0) {  /* 'env' parameter? */
-      lua_pushvalue(L, envidx);  /* environment for loaded function */
-      if (!lua_setupvalue(L, -2, 1))  /* set it as 1st upvalue */
-        lua_pop(L, 1);  /* remove 'env' if not used by previous call */
+      lum_pushvalue(L, envidx);  /* environment for loaded function */
+      if (!lum_setupvalue(L, -2, 1))  /* set it as 1st upvalue */
+        lum_pop(L, 1);  /* remove 'env' if not used by previous call */
     }
     return 1;
   }
   else {  /* error (message is on top of the stack) */
-    luaL_pushfail(L);
-    lua_insert(L, -2);  /* put before error message */
+    lumL_pushfail(L);
+    lum_insert(L, -2);  /* put before error message */
     return 2;  /* return fail plus error message */
   }
 }
 
 
-static const char *getMode (lua_State *L, int idx) {
-  const char *mode = luaL_optstring(L, idx, "bt");
-  if (strchr(mode, 'B') != NULL)  /* Lua code cannot use fixed buffers */
-    luaL_argerror(L, idx, "invalid mode");
+static const char *getMode (lum_State *L, int idx) {
+  const char *mode = lumL_optstring(L, idx, "bt");
+  if (strchr(mode, 'B') != NULL)  /* Lum code cannot use fixed buffers */
+    lumL_argerror(L, idx, "invalid mode");
   return mode;
 }
 
 
-static int luaB_loadfile (lua_State *L) {
-  const char *fname = luaL_optstring(L, 1, NULL);
+static int lumB_loadfile (lum_State *L) {
+  const char *fname = lumL_optstring(L, 1, NULL);
   const char *mode = getMode(L, 2);
-  int env = (!lua_isnone(L, 3) ? 3 : 0);  /* 'env' index or 0 if no 'env' */
-  int status = luaL_loadfilex(L, fname, mode);
+  int env = (!lum_isnone(L, 3) ? 3 : 0);  /* 'env' index or 0 if no 'env' */
+  int status = lumL_loadfilex(L, fname, mode);
   return load_aux(L, status, env);
 }
 
@@ -371,43 +371,43 @@ static int luaB_loadfile (lua_State *L) {
 
 
 /*
-** Reader for generic 'load' function: 'lua_load' uses the
+** Reader for generic 'load' function: 'lum_load' uses the
 ** stack for internal stuff, so the reader cannot change the
 ** stack top. Instead, it keeps its resulting string in a
 ** reserved slot inside the stack.
 */
-static const char *generic_reader (lua_State *L, void *ud, size_t *size) {
+static const char *generic_reader (lum_State *L, void *ud, size_t *size) {
   (void)(ud);  /* not used */
-  luaL_checkstack(L, 2, "too many nested functions");
-  lua_pushvalue(L, 1);  /* get function */
-  lua_call(L, 0, 1);  /* call it */
-  if (lua_isnil(L, -1)) {
-    lua_pop(L, 1);  /* pop result */
+  lumL_checkstack(L, 2, "too many nested functions");
+  lum_pushvalue(L, 1);  /* get function */
+  lum_call(L, 0, 1);  /* call it */
+  if (lum_isnil(L, -1)) {
+    lum_pop(L, 1);  /* pop result */
     *size = 0;
     return NULL;
   }
-  else if (l_unlikely(!lua_isstring(L, -1)))
-    luaL_error(L, "reader function must return a string");
-  lua_replace(L, RESERVEDSLOT);  /* save string in reserved slot */
-  return lua_tolstring(L, RESERVEDSLOT, size);
+  else if (l_unlikely(!lum_isstring(L, -1)))
+    lumL_error(L, "reader function must return a string");
+  lum_replace(L, RESERVEDSLOT);  /* save string in reserved slot */
+  return lum_tolstring(L, RESERVEDSLOT, size);
 }
 
 
-static int luaB_load (lua_State *L) {
+static int lumB_load (lum_State *L) {
   int status;
   size_t l;
-  const char *s = lua_tolstring(L, 1, &l);
+  const char *s = lum_tolstring(L, 1, &l);
   const char *mode = getMode(L, 3);
-  int env = (!lua_isnone(L, 4) ? 4 : 0);  /* 'env' index or 0 if no 'env' */
+  int env = (!lum_isnone(L, 4) ? 4 : 0);  /* 'env' index or 0 if no 'env' */
   if (s != NULL) {  /* loading a string? */
-    const char *chunkname = luaL_optstring(L, 2, s);
-    status = luaL_loadbufferx(L, s, l, chunkname, mode);
+    const char *chunkname = lumL_optstring(L, 2, s);
+    status = lumL_loadbufferx(L, s, l, chunkname, mode);
   }
   else {  /* loading from a reader function */
-    const char *chunkname = luaL_optstring(L, 2, "=(load)");
-    luaL_checktype(L, 1, LUA_TFUNCTION);
-    lua_settop(L, RESERVEDSLOT);  /* create reserved slot */
-    status = lua_load(L, generic_reader, NULL, chunkname, mode);
+    const char *chunkname = lumL_optstring(L, 2, "=(load)");
+    lumL_checktype(L, 1, LUM_TFUNCTION);
+    lum_settop(L, RESERVEDSLOT);  /* create reserved slot */
+    status = lum_load(L, generic_reader, NULL, chunkname, mode);
   }
   return load_aux(L, status, env);
 }
@@ -415,46 +415,46 @@ static int luaB_load (lua_State *L) {
 /* }====================================================== */
 
 
-static int dofilecont (lua_State *L, int d1, lua_KContext d2) {
-  (void)d1;  (void)d2;  /* only to match 'lua_Kfunction' prototype */
-  return lua_gettop(L) - 1;
+static int dofilecont (lum_State *L, int d1, lum_KContext d2) {
+  (void)d1;  (void)d2;  /* only to match 'lum_Kfunction' prototype */
+  return lum_gettop(L) - 1;
 }
 
 
-static int luaB_dofile (lua_State *L) {
-  const char *fname = luaL_optstring(L, 1, NULL);
-  lua_settop(L, 1);
-  if (l_unlikely(luaL_loadfile(L, fname) != LUA_OK))
-    return lua_error(L);
-  lua_callk(L, 0, LUA_MULTRET, 0, dofilecont);
+static int lumB_dofile (lum_State *L) {
+  const char *fname = lumL_optstring(L, 1, NULL);
+  lum_settop(L, 1);
+  if (l_unlikely(lumL_loadfile(L, fname) != LUM_OK))
+    return lum_error(L);
+  lum_callk(L, 0, LUM_MULTRET, 0, dofilecont);
   return dofilecont(L, 0, 0);
 }
 
 
-static int luaB_assert (lua_State *L) {
-  if (l_likely(lua_toboolean(L, 1)))  /* condition is true? */
-    return lua_gettop(L);  /* return all arguments */
+static int lumB_assert (lum_State *L) {
+  if (l_likely(lum_toboolean(L, 1)))  /* condition is true? */
+    return lum_gettop(L);  /* return all arguments */
   else {  /* error */
-    luaL_checkany(L, 1);  /* there must be a condition */
-    lua_remove(L, 1);  /* remove it */
-    lua_pushliteral(L, "assertion failed!");  /* default message */
-    lua_settop(L, 1);  /* leave only message (default if no other one) */
-    return luaB_error(L);  /* call 'error' */
+    lumL_checkany(L, 1);  /* there must be a condition */
+    lum_remove(L, 1);  /* remove it */
+    lum_pushliteral(L, "assertion failed!");  /* default message */
+    lum_settop(L, 1);  /* leave only message (default if no other one) */
+    return lumB_error(L);  /* call 'error' */
   }
 }
 
 
-static int luaB_select (lua_State *L) {
-  int n = lua_gettop(L);
-  if (lua_type(L, 1) == LUA_TSTRING && *lua_tostring(L, 1) == '#') {
-    lua_pushinteger(L, n-1);
+static int lumB_select (lum_State *L) {
+  int n = lum_gettop(L);
+  if (lum_type(L, 1) == LUM_TSTRING && *lum_tostring(L, 1) == '#') {
+    lum_pushinteger(L, n-1);
     return 1;
   }
   else {
-    lua_Integer i = luaL_checkinteger(L, 1);
+    lum_Integer i = lumL_checkinteger(L, 1);
     if (i < 0) i = n + i;
     else if (i > n) i = n;
-    luaL_argcheck(L, 1 <= i, 1, "index out of range");
+    lumL_argcheck(L, 1 <= i, 1, "index out of range");
     return n - (int)i;
   }
 }
@@ -467,92 +467,92 @@ static int luaB_select (lua_State *L) {
 ** 'extra' values (where 'extra' is exactly the number of items to be
 ** ignored).
 */
-static int finishpcall (lua_State *L, int status, lua_KContext extra) {
-  if (l_unlikely(status != LUA_OK && status != LUA_YIELD)) {  /* error? */
-    lua_pushboolean(L, 0);  /* first result (false) */
-    lua_pushvalue(L, -2);  /* error message */
+static int finishpcall (lum_State *L, int status, lum_KContext extra) {
+  if (l_unlikely(status != LUM_OK && status != LUM_YIELD)) {  /* error? */
+    lum_pushboolean(L, 0);  /* first result (false) */
+    lum_pushvalue(L, -2);  /* error message */
     return 2;  /* return false, msg */
   }
   else
-    return lua_gettop(L) - (int)extra;  /* return all results */
+    return lum_gettop(L) - (int)extra;  /* return all results */
 }
 
 
-static int luaB_pcall (lua_State *L) {
+static int lumB_pcall (lum_State *L) {
   int status;
-  luaL_checkany(L, 1);
-  lua_pushboolean(L, 1);  /* first result if no errors */
-  lua_insert(L, 1);  /* put it in place */
-  status = lua_pcallk(L, lua_gettop(L) - 2, LUA_MULTRET, 0, 0, finishpcall);
+  lumL_checkany(L, 1);
+  lum_pushboolean(L, 1);  /* first result if no errors */
+  lum_insert(L, 1);  /* put it in place */
+  status = lum_pcallk(L, lum_gettop(L) - 2, LUM_MULTRET, 0, 0, finishpcall);
   return finishpcall(L, status, 0);
 }
 
 
 /*
-** Do a protected call with error handling. After 'lua_rotate', the
+** Do a protected call with error handling. After 'lum_rotate', the
 ** stack will have <f, err, true, f, [args...]>; so, the function passes
 ** 2 to 'finishpcall' to skip the 2 first values when returning results.
 */
-static int luaB_xpcall (lua_State *L) {
+static int lumB_xpcall (lum_State *L) {
   int status;
-  int n = lua_gettop(L);
-  luaL_checktype(L, 2, LUA_TFUNCTION);  /* check error function */
-  lua_pushboolean(L, 1);  /* first result */
-  lua_pushvalue(L, 1);  /* function */
-  lua_rotate(L, 3, 2);  /* move them below function's arguments */
-  status = lua_pcallk(L, n - 2, LUA_MULTRET, 2, 2, finishpcall);
+  int n = lum_gettop(L);
+  lumL_checktype(L, 2, LUM_TFUNCTION);  /* check error function */
+  lum_pushboolean(L, 1);  /* first result */
+  lum_pushvalue(L, 1);  /* function */
+  lum_rotate(L, 3, 2);  /* move them below function's arguments */
+  status = lum_pcallk(L, n - 2, LUM_MULTRET, 2, 2, finishpcall);
   return finishpcall(L, status, 2);
 }
 
 
-static int luaB_tostring (lua_State *L) {
-  luaL_checkany(L, 1);
-  luaL_tolstring(L, 1, NULL);
+static int lumB_tostring (lum_State *L) {
+  lumL_checkany(L, 1);
+  lumL_tolstring(L, 1, NULL);
   return 1;
 }
 
 
-static const luaL_Reg base_funcs[] = {
-  {"assert", luaB_assert},
-  {"collectgarbage", luaB_collectgarbage},
-  {"dofile", luaB_dofile},
-  {"error", luaB_error},
-  {"getmetatable", luaB_getmetatable},
-  {"ipairs", luaB_ipairs},
-  {"loadfile", luaB_loadfile},
-  {"load", luaB_load},
-  {"next", luaB_next},
-  {"pairs", luaB_pairs},
-  {"pcall", luaB_pcall},
-  {"print", luaB_print},
-  {"warn", luaB_warn},
-  {"rawequal", luaB_rawequal},
-  {"rawlen", luaB_rawlen},
-  {"rawget", luaB_rawget},
-  {"rawset", luaB_rawset},
-  {"select", luaB_select},
-  {"setmetatable", luaB_setmetatable},
-  {"tonumber", luaB_tonumber},
-  {"tostring", luaB_tostring},
-  {"type", luaB_type},
-  {"xpcall", luaB_xpcall},
+static const lumL_Reg base_funcs[] = {
+  {"assert", lumB_assert},
+  {"collectgarbage", lumB_collectgarbage},
+  {"dofile", lumB_dofile},
+  {"error", lumB_error},
+  {"getmetatable", lumB_getmetatable},
+  {"ipairs", lumB_ipairs},
+  {"loadfile", lumB_loadfile},
+  {"load", lumB_load},
+  {"next", lumB_next},
+  {"pairs", lumB_pairs},
+  {"pcall", lumB_pcall},
+  {"print", lumB_print},
+  {"warn", lumB_warn},
+  {"rawequal", lumB_rawequal},
+  {"rawlen", lumB_rawlen},
+  {"rawget", lumB_rawget},
+  {"rawset", lumB_rawset},
+  {"select", lumB_select},
+  {"setmetatable", lumB_setmetatable},
+  {"tonumber", lumB_tonumber},
+  {"tostring", lumB_tostring},
+  {"type", lumB_type},
+  {"xpcall", lumB_xpcall},
   /* placeholders */
-  {LUA_GNAME, NULL},
+  {LUM_GNAME, NULL},
   {"_VERSION", NULL},
   {NULL, NULL}
 };
 
 
-LUAMOD_API int luaopen_base (lua_State *L) {
+LUMMOD_API int lumopen_base (lum_State *L) {
   /* open lib into global table */
-  lua_pushglobaltable(L);
-  luaL_setfuncs(L, base_funcs, 0);
+  lum_pushglobaltable(L);
+  lumL_setfuncs(L, base_funcs, 0);
   /* set global _G */
-  lua_pushvalue(L, -1);
-  lua_setfield(L, -2, LUA_GNAME);
+  lum_pushvalue(L, -1);
+  lum_setfield(L, -2, LUM_GNAME);
   /* set global _VERSION */
-  lua_pushliteral(L, LUA_VERSION);
-  lua_setfield(L, -2, "_VERSION");
+  lum_pushliteral(L, LUM_VERSION);
+  lum_setfield(L, -2, "_VERSION");
   return 1;
 }
 

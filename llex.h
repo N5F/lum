@@ -1,7 +1,7 @@
 /*
 ** $Id: llex.h $
 ** Lexical Analyzer
-** See Copyright Notice in lua.h
+** See Copyright Notice in lum.h
 */
 
 #ifndef llex_h
@@ -20,8 +20,8 @@
 #define FIRST_RESERVED	(UCHAR_MAX + 1)
 
 
-#if !defined(LUA_ENV)
-#define LUA_ENV		"_ENV"
+#if !defined(LUM_ENV)
+#define LUM_ENV		"_ENV"
 #endif
 
 
@@ -47,8 +47,8 @@ enum RESERVED {
 
 
 typedef union {
-  lua_Number r;
-  lua_Integer i;
+  lum_Number r;
+  lum_Integer i;
   TString *ts;
 } SemInfo;  /* semantics information */
 
@@ -68,7 +68,7 @@ typedef struct LexState {
   Token t;  /* current token */
   Token lookahead;  /* look ahead token */
   struct FuncState *fs;  /* current function (parser) */
-  struct lua_State *L;
+  struct lum_State *L;
   ZIO *z;  /* input stream */
   Mbuffer *buff;  /* buffer for tokens */
   Table *h;  /* to avoid collection/reuse strings */
@@ -78,14 +78,14 @@ typedef struct LexState {
 } LexState;
 
 
-LUAI_FUNC void luaX_init (lua_State *L);
-LUAI_FUNC void luaX_setinput (lua_State *L, LexState *ls, ZIO *z,
+LUMI_FUNC void lumX_init (lum_State *L);
+LUMI_FUNC void lumX_setinput (lum_State *L, LexState *ls, ZIO *z,
                               TString *source, int firstchar);
-LUAI_FUNC TString *luaX_newstring (LexState *ls, const char *str, size_t l);
-LUAI_FUNC void luaX_next (LexState *ls);
-LUAI_FUNC int luaX_lookahead (LexState *ls);
-LUAI_FUNC l_noret luaX_syntaxerror (LexState *ls, const char *s);
-LUAI_FUNC const char *luaX_token2str (LexState *ls, int token);
+LUMI_FUNC TString *lumX_newstring (LexState *ls, const char *str, size_t l);
+LUMI_FUNC void lumX_next (LexState *ls);
+LUMI_FUNC int lumX_lookahead (LexState *ls);
+LUMI_FUNC l_noret lumX_syntaxerror (LexState *ls, const char *s);
+LUMI_FUNC const char *lumX_token2str (LexState *ls, int token);
 
 
 #endif

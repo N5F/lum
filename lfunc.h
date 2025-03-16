@@ -1,7 +1,7 @@
 /*
 ** $Id: lfunc.h $
 ** Auxiliary functions to manipulate prototypes and closures
-** See Copyright Notice in lua.h
+** See Copyright Notice in lum.h
 */
 
 #ifndef lfunc_h
@@ -23,7 +23,7 @@
 
 
 /*
-** maximum number of upvalues in a closure (both C and Lua). (Value
+** maximum number of upvalues in a closure (both C and Lum). (Value
 ** must fit in a VM register.)
 */
 #define MAXUPVAL	255
@@ -44,21 +44,21 @@
 
 
 /* special status to close upvalues preserving the top of the stack */
-#define CLOSEKTOP	(LUA_ERRERR + 1)
+#define CLOSEKTOP	(LUM_ERRERR + 1)
 
 
-LUAI_FUNC Proto *luaF_newproto (lua_State *L);
-LUAI_FUNC CClosure *luaF_newCclosure (lua_State *L, int nupvals);
-LUAI_FUNC LClosure *luaF_newLclosure (lua_State *L, int nupvals);
-LUAI_FUNC void luaF_initupvals (lua_State *L, LClosure *cl);
-LUAI_FUNC UpVal *luaF_findupval (lua_State *L, StkId level);
-LUAI_FUNC void luaF_newtbcupval (lua_State *L, StkId level);
-LUAI_FUNC void luaF_closeupval (lua_State *L, StkId level);
-LUAI_FUNC StkId luaF_close (lua_State *L, StkId level, TStatus status, int yy);
-LUAI_FUNC void luaF_unlinkupval (UpVal *uv);
-LUAI_FUNC lu_mem luaF_protosize (Proto *p);
-LUAI_FUNC void luaF_freeproto (lua_State *L, Proto *f);
-LUAI_FUNC const char *luaF_getlocalname (const Proto *func, int local_number,
+LUMI_FUNC Proto *lumF_newproto (lum_State *L);
+LUMI_FUNC CClosure *lumF_newCclosure (lum_State *L, int nupvals);
+LUMI_FUNC LClosure *lumF_newLclosure (lum_State *L, int nupvals);
+LUMI_FUNC void lumF_initupvals (lum_State *L, LClosure *cl);
+LUMI_FUNC UpVal *lumF_findupval (lum_State *L, StkId level);
+LUMI_FUNC void lumF_newtbcupval (lum_State *L, StkId level);
+LUMI_FUNC void lumF_closeupval (lum_State *L, StkId level);
+LUMI_FUNC StkId lumF_close (lum_State *L, StkId level, TStatus status, int yy);
+LUMI_FUNC void lumF_unlinkupval (UpVal *uv);
+LUMI_FUNC lu_mem lumF_protosize (Proto *p);
+LUMI_FUNC void lumF_freeproto (lum_State *L, Proto *f);
+LUMI_FUNC const char *lumF_getlocalname (const Proto *func, int local_number,
                                          int pc);
 
 

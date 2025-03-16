@@ -1,44 +1,44 @@
-#include "lua.h"
+#include "lum.h"
 #include "lauxlib.h"
 
-static int id (lua_State *L) {
-  return lua_gettop(L);
+static int id (lum_State *L) {
+  return lum_gettop(L);
 }
 
 
-static const struct luaL_Reg funcs[] = {
+static const struct lumL_Reg funcs[] = {
   {"id", id},
   {NULL, NULL}
 };
 
 
 /* function used by lib11.c */
-LUAMOD_API int lib1_export (lua_State *L) {
-  lua_pushstring(L, "exported");
+LUMMOD_API int lib1_export (lum_State *L) {
+  lum_pushstring(L, "exported");
   return 1;
 }
 
 
-LUAMOD_API int onefunction (lua_State *L) {
-  luaL_checkversion(L);
-  lua_settop(L, 2);
-  lua_pushvalue(L, 1);
+LUMMOD_API int onefunction (lum_State *L) {
+  lumL_checkversion(L);
+  lum_settop(L, 2);
+  lum_pushvalue(L, 1);
   return 2;
 }
 
 
-LUAMOD_API int anotherfunc (lua_State *L) {
-  luaL_checkversion(L);
-  lua_pushfstring(L, "%d%%%d\n", (int)lua_tointeger(L, 1),
-                                 (int)lua_tointeger(L, 2));
+LUMMOD_API int anotherfunc (lum_State *L) {
+  lumL_checkversion(L);
+  lum_pushfstring(L, "%d%%%d\n", (int)lum_tointeger(L, 1),
+                                 (int)lum_tointeger(L, 2));
   return 1;
 } 
 
 
-LUAMOD_API int luaopen_lib1_sub (lua_State *L) {
-  lua_setglobal(L, "y");  /* 2nd arg: extra value (file name) */
-  lua_setglobal(L, "x");  /* 1st arg: module name */
-  luaL_newlib(L, funcs);
+LUMMOD_API int lumopen_lib1_sub (lum_State *L) {
+  lum_setglobal(L, "y");  /* 2nd arg: extra value (file name) */
+  lum_setglobal(L, "x");  /* 1st arg: module name */
+  lumL_newlib(L, funcs);
   return 1;
 }
 

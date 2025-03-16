@@ -1,24 +1,24 @@
-#include "lua.h"
+#include "lum.h"
 #include "lauxlib.h"
 
-static int id (lua_State *L) {
-  lua_pushboolean(L, 1);
-  lua_insert(L, 1);
-  return lua_gettop(L);
+static int id (lum_State *L) {
+  lum_pushboolean(L, 1);
+  lum_insert(L, 1);
+  return lum_gettop(L);
 }
 
 
-static const struct luaL_Reg funcs[] = {
+static const struct lumL_Reg funcs[] = {
   {"id", id},
   {NULL, NULL}
 };
 
 
-LUAMOD_API int luaopen_lib2 (lua_State *L) {
-  lua_settop(L, 2);
-  lua_setglobal(L, "y");  /* y gets 2nd parameter */
-  lua_setglobal(L, "x");  /* x gets 1st parameter */
-  luaL_newlib(L, funcs);
+LUMMOD_API int lumopen_lib2 (lum_State *L) {
+  lum_settop(L, 2);
+  lum_setglobal(L, "y");  /* y gets 2nd parameter */
+  lum_setglobal(L, "x");  /* x gets 1st parameter */
+  lumL_newlib(L, funcs);
   return 1;
 }
 

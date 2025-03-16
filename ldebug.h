@@ -1,7 +1,7 @@
 /*
 ** $Id: ldebug.h $
 ** Auxiliary functions from Debug Interface module
-** See Copyright Notice in lua.h
+** See Copyright Notice in lum.h
 */
 
 #ifndef ldebug_h
@@ -14,7 +14,7 @@
 #define pcRel(pc, p)	(cast_int((pc) - (p)->code) - 1)
 
 
-/* Active Lua function (given call info) */
+/* Active Lum function (given call info) */
 #define ci_func(ci)		(clLvalue(s2v((ci)->func.p)))
 
 
@@ -36,29 +36,29 @@
 #endif
 
 
-LUAI_FUNC int luaG_getfuncline (const Proto *f, int pc);
-LUAI_FUNC const char *luaG_findlocal (lua_State *L, CallInfo *ci, int n,
+LUMI_FUNC int lumG_getfuncline (const Proto *f, int pc);
+LUMI_FUNC const char *lumG_findlocal (lum_State *L, CallInfo *ci, int n,
                                                     StkId *pos);
-LUAI_FUNC l_noret luaG_typeerror (lua_State *L, const TValue *o,
+LUMI_FUNC l_noret lumG_typeerror (lum_State *L, const TValue *o,
                                                 const char *opname);
-LUAI_FUNC l_noret luaG_callerror (lua_State *L, const TValue *o);
-LUAI_FUNC l_noret luaG_forerror (lua_State *L, const TValue *o,
+LUMI_FUNC l_noret lumG_callerror (lum_State *L, const TValue *o);
+LUMI_FUNC l_noret lumG_forerror (lum_State *L, const TValue *o,
                                                const char *what);
-LUAI_FUNC l_noret luaG_concaterror (lua_State *L, const TValue *p1,
+LUMI_FUNC l_noret lumG_concaterror (lum_State *L, const TValue *p1,
                                                   const TValue *p2);
-LUAI_FUNC l_noret luaG_opinterror (lua_State *L, const TValue *p1,
+LUMI_FUNC l_noret lumG_opinterror (lum_State *L, const TValue *p1,
                                                  const TValue *p2,
                                                  const char *msg);
-LUAI_FUNC l_noret luaG_tointerror (lua_State *L, const TValue *p1,
+LUMI_FUNC l_noret lumG_tointerror (lum_State *L, const TValue *p1,
                                                  const TValue *p2);
-LUAI_FUNC l_noret luaG_ordererror (lua_State *L, const TValue *p1,
+LUMI_FUNC l_noret lumG_ordererror (lum_State *L, const TValue *p1,
                                                  const TValue *p2);
-LUAI_FUNC l_noret luaG_runerror (lua_State *L, const char *fmt, ...);
-LUAI_FUNC const char *luaG_addinfo (lua_State *L, const char *msg,
+LUMI_FUNC l_noret lumG_runerror (lum_State *L, const char *fmt, ...);
+LUMI_FUNC const char *lumG_addinfo (lum_State *L, const char *msg,
                                                   TString *src, int line);
-LUAI_FUNC l_noret luaG_errormsg (lua_State *L);
-LUAI_FUNC int luaG_traceexec (lua_State *L, const Instruction *pc);
-LUAI_FUNC int luaG_tracecall (lua_State *L);
+LUMI_FUNC l_noret lumG_errormsg (lum_State *L);
+LUMI_FUNC int lumG_traceexec (lum_State *L, const Instruction *pc);
+LUMI_FUNC int lumG_tracecall (lum_State *L);
 
 
 #endif

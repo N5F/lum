@@ -1,14 +1,14 @@
 /*
 ** $Id: lzio.h $
 ** Buffered streams
-** See Copyright Notice in lua.h
+** See Copyright Notice in lum.h
 */
 
 
 #ifndef lzio_h
 #define lzio_h
 
-#include "lua.h"
+#include "lum.h"
 
 #include "lmem.h"
 
@@ -17,7 +17,7 @@
 
 typedef struct Zio ZIO;
 
-#define zgetc(z)  (((z)->n--)>0 ?  cast_uchar(*(z)->p++) : luaZ_fill(z))
+#define zgetc(z)  (((z)->n--)>0 ?  cast_uchar(*(z)->p++) : lumZ_fill(z))
 
 
 typedef struct Mbuffer {
@@ -26,29 +26,29 @@ typedef struct Mbuffer {
   size_t buffsize;
 } Mbuffer;
 
-#define luaZ_initbuffer(L, buff) ((buff)->buffer = NULL, (buff)->buffsize = 0)
+#define lumZ_initbuffer(L, buff) ((buff)->buffer = NULL, (buff)->buffsize = 0)
 
-#define luaZ_buffer(buff)	((buff)->buffer)
-#define luaZ_sizebuffer(buff)	((buff)->buffsize)
-#define luaZ_bufflen(buff)	((buff)->n)
+#define lumZ_buffer(buff)	((buff)->buffer)
+#define lumZ_sizebuffer(buff)	((buff)->buffsize)
+#define lumZ_bufflen(buff)	((buff)->n)
 
-#define luaZ_buffremove(buff,i)	((buff)->n -= cast_sizet(i))
-#define luaZ_resetbuffer(buff) ((buff)->n = 0)
+#define lumZ_buffremove(buff,i)	((buff)->n -= cast_sizet(i))
+#define lumZ_resetbuffer(buff) ((buff)->n = 0)
 
 
-#define luaZ_resizebuffer(L, buff, size) \
-	((buff)->buffer = luaM_reallocvchar(L, (buff)->buffer, \
+#define lumZ_resizebuffer(L, buff, size) \
+	((buff)->buffer = lumM_reallocvchar(L, (buff)->buffer, \
 				(buff)->buffsize, size), \
 	(buff)->buffsize = size)
 
-#define luaZ_freebuffer(L, buff)	luaZ_resizebuffer(L, buff, 0)
+#define lumZ_freebuffer(L, buff)	lumZ_resizebuffer(L, buff, 0)
 
 
-LUAI_FUNC void luaZ_init (lua_State *L, ZIO *z, lua_Reader reader,
+LUMI_FUNC void lumZ_init (lum_State *L, ZIO *z, lum_Reader reader,
                                         void *data);
-LUAI_FUNC size_t luaZ_read (ZIO* z, void *b, size_t n);	/* read next n bytes */
+LUMI_FUNC size_t lumZ_read (ZIO* z, void *b, size_t n);	/* read next n bytes */
 
-LUAI_FUNC const void *luaZ_getaddr (ZIO* z, size_t n);
+LUMI_FUNC const void *lumZ_getaddr (ZIO* z, size_t n);
 
 
 /* --------- Private Part ------------------ */
@@ -56,12 +56,12 @@ LUAI_FUNC const void *luaZ_getaddr (ZIO* z, size_t n);
 struct Zio {
   size_t n;			/* bytes still unread */
   const char *p;		/* current position in buffer */
-  lua_Reader reader;		/* reader function */
+  lum_Reader reader;		/* reader function */
   void *data;			/* additional data */
-  lua_State *L;			/* Lua state (for reader) */
+  lum_State *L;			/* Lum state (for reader) */
 };
 
 
-LUAI_FUNC int luaZ_fill (ZIO *z);
+LUMI_FUNC int lumZ_fill (ZIO *z);
 
 #endif

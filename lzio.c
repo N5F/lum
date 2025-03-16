@@ -1,18 +1,18 @@
 /*
 ** $Id: lzio.c $
 ** Buffered streams
-** See Copyright Notice in lua.h
+** See Copyright Notice in lum.h
 */
 
 #define lzio_c
-#define LUA_CORE
+#define LUM_CORE
 
 #include "lprefix.h"
 
 
 #include <string.h>
 
-#include "lua.h"
+#include "lum.h"
 
 #include "lapi.h"
 #include "llimits.h"
@@ -21,13 +21,13 @@
 #include "lzio.h"
 
 
-int luaZ_fill (ZIO *z) {
+int lumZ_fill (ZIO *z) {
   size_t size;
-  lua_State *L = z->L;
+  lum_State *L = z->L;
   const char *buff;
-  lua_unlock(L);
+  lum_unlock(L);
   buff = z->reader(L, z->data, &size);
-  lua_lock(L);
+  lum_lock(L);
   if (buff == NULL || size == 0)
     return EOZ;
   z->n = size - 1;  /* discount char being returned */
@@ -36,7 +36,7 @@ int luaZ_fill (ZIO *z) {
 }
 
 
-void luaZ_init (lua_State *L, ZIO *z, lua_Reader reader, void *data) {
+void lumZ_init (lum_State *L, ZIO *z, lum_Reader reader, void *data) {
   z->L = L;
   z->reader = reader;
   z->data = data;
@@ -49,10 +49,10 @@ void luaZ_init (lua_State *L, ZIO *z, lua_Reader reader, void *data) {
 
 static int checkbuffer (ZIO *z) {
   if (z->n == 0) {  /* no bytes in buffer? */
-    if (luaZ_fill(z) == EOZ)  /* try to read more */
+    if (lumZ_fill(z) == EOZ)  /* try to read more */
       return 0;  /* no more input */
     else {
-      z->n++;  /* luaZ_fill consumed first byte; put it back */
+      z->n++;  /* lumZ_fill consumed first byte; put it back */
       z->p--;
     }
   }
@@ -60,7 +60,7 @@ static int checkbuffer (ZIO *z) {
 }
 
 
-size_t luaZ_read (ZIO *z, void *b, size_t n) {
+size_t lumZ_read (ZIO *z, void *b, size_t n) {
   while (n) {
     size_t m;
     if (!checkbuffer(z))
@@ -76,7 +76,7 @@ size_t luaZ_read (ZIO *z, void *b, size_t n) {
 }
 
 
-const void *luaZ_getaddr (ZIO* z, size_t n) {
+const void *lumZ_getaddr (ZIO* z, size_t n) {
   const void *res;
   if (!checkbuffer(z))
     return NULL;  /* no more input */

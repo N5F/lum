@@ -1,7 +1,7 @@
 /*
 ** $Id: ltable.h $
-** Lua tables (hash)
-** See Copyright Notice in lua.h
+** Lum tables (hash)
+** See Copyright Notice in lum.h
 */
 
 #ifndef ltable_h
@@ -46,22 +46,22 @@
 
 
 
-#define luaH_fastgeti(t,k,res,tag) \
-  { Table *h = t; lua_Unsigned u = l_castS2U(k) - 1u; \
+#define lumH_fastgeti(t,k,res,tag) \
+  { Table *h = t; lum_Unsigned u = l_castS2U(k) - 1u; \
     if ((u < h->asize)) { \
       tag = *getArrTag(h, u); \
       if (!tagisempty(tag)) { farr2val(h, u, tag, res); }} \
-    else { tag = luaH_getint(h, (k), res); }}
+    else { tag = lumH_getint(h, (k), res); }}
 
 
-#define luaH_fastseti(t,k,val,hres) \
-  { Table *h = t; lua_Unsigned u = l_castS2U(k) - 1u; \
+#define lumH_fastseti(t,k,val,hres) \
+  { Table *h = t; lum_Unsigned u = l_castS2U(k) - 1u; \
     if ((u < h->asize)) { \
       lu_byte *tag = getArrTag(h, u); \
       if (checknoTM(h->metatable, TM_NEWINDEX) || !tagisempty(*tag)) \
         { fval2arr(h, u, tag, val); hres = HOK; } \
       else hres = ~cast_int(u); } \
-    else { hres = luaH_psetint(h, k, val); }}
+    else { hres = lumH_psetint(h, k, val); }}
 
 
 /* results from pset */
@@ -71,12 +71,12 @@
 #define HFIRSTNODE	3
 
 /*
-** 'luaH_get*' operations set 'res', unless the value is absent, and
+** 'lumH_get*' operations set 'res', unless the value is absent, and
 ** return the tag of the result.
-** The 'luaH_pset*' (pre-set) operations set the given value and return
+** The 'lumH_pset*' (pre-set) operations set the given value and return
 ** HOK, unless the original value is absent. In that case, if the key
 ** is really absent, they return HNOTFOUND. Otherwise, if there is a
-** slot with that key but with no value, 'luaH_pset*' return an encoding
+** slot with that key but with no value, 'lumH_pset*' return an encoding
 ** of where the key is (usually called 'hres'). (pset cannot set that
 ** value because there might be a metamethod.) If the slot is in the
 ** hash part, the encoding is (HFIRSTNODE + hash index); if the slot is
@@ -118,7 +118,7 @@
 
 /*
 ** The unsigned between the two arrays is used as a hint for #t;
-** see luaH_getn. It is stored there to avoid wasting space in
+** see lumH_getn. It is stored there to avoid wasting space in
 ** the structure Table for tables with no array part.
 */
 #define lenhint(t)	cast(unsigned*, (t)->array)
@@ -146,38 +146,38 @@
   (*tag = (val)->tt_, *getArrVal(h,(k)) = (val)->value_)
 
 
-LUAI_FUNC lu_byte luaH_get (Table *t, const TValue *key, TValue *res);
-LUAI_FUNC lu_byte luaH_getshortstr (Table *t, TString *key, TValue *res);
-LUAI_FUNC lu_byte luaH_getstr (Table *t, TString *key, TValue *res);
-LUAI_FUNC lu_byte luaH_getint (Table *t, lua_Integer key, TValue *res);
+LUMI_FUNC lu_byte lumH_get (Table *t, const TValue *key, TValue *res);
+LUMI_FUNC lu_byte lumH_getshortstr (Table *t, TString *key, TValue *res);
+LUMI_FUNC lu_byte lumH_getstr (Table *t, TString *key, TValue *res);
+LUMI_FUNC lu_byte lumH_getint (Table *t, lum_Integer key, TValue *res);
 
 /* Special get for metamethods */
-LUAI_FUNC const TValue *luaH_Hgetshortstr (Table *t, TString *key);
+LUMI_FUNC const TValue *lumH_Hgetshortstr (Table *t, TString *key);
 
-LUAI_FUNC int luaH_psetint (Table *t, lua_Integer key, TValue *val);
-LUAI_FUNC int luaH_psetshortstr (Table *t, TString *key, TValue *val);
-LUAI_FUNC int luaH_psetstr (Table *t, TString *key, TValue *val);
-LUAI_FUNC int luaH_pset (Table *t, const TValue *key, TValue *val);
+LUMI_FUNC int lumH_psetint (Table *t, lum_Integer key, TValue *val);
+LUMI_FUNC int lumH_psetshortstr (Table *t, TString *key, TValue *val);
+LUMI_FUNC int lumH_psetstr (Table *t, TString *key, TValue *val);
+LUMI_FUNC int lumH_pset (Table *t, const TValue *key, TValue *val);
 
-LUAI_FUNC void luaH_setint (lua_State *L, Table *t, lua_Integer key,
+LUMI_FUNC void lumH_setint (lum_State *L, Table *t, lum_Integer key,
                                                     TValue *value);
-LUAI_FUNC void luaH_set (lua_State *L, Table *t, const TValue *key,
+LUMI_FUNC void lumH_set (lum_State *L, Table *t, const TValue *key,
                                                  TValue *value);
 
-LUAI_FUNC void luaH_finishset (lua_State *L, Table *t, const TValue *key,
+LUMI_FUNC void lumH_finishset (lum_State *L, Table *t, const TValue *key,
                                               TValue *value, int hres);
-LUAI_FUNC Table *luaH_new (lua_State *L);
-LUAI_FUNC void luaH_resize (lua_State *L, Table *t, unsigned nasize,
+LUMI_FUNC Table *lumH_new (lum_State *L);
+LUMI_FUNC void lumH_resize (lum_State *L, Table *t, unsigned nasize,
                                                     unsigned nhsize);
-LUAI_FUNC void luaH_resizearray (lua_State *L, Table *t, unsigned nasize);
-LUAI_FUNC lu_mem luaH_size (Table *t);
-LUAI_FUNC void luaH_free (lua_State *L, Table *t);
-LUAI_FUNC int luaH_next (lua_State *L, Table *t, StkId key);
-LUAI_FUNC lua_Unsigned luaH_getn (Table *t);
+LUMI_FUNC void lumH_resizearray (lum_State *L, Table *t, unsigned nasize);
+LUMI_FUNC lu_mem lumH_size (Table *t);
+LUMI_FUNC void lumH_free (lum_State *L, Table *t);
+LUMI_FUNC int lumH_next (lum_State *L, Table *t, StkId key);
+LUMI_FUNC lum_Unsigned lumH_getn (Table *t);
 
 
-#if defined(LUA_DEBUG)
-LUAI_FUNC Node *luaH_mainposition (const Table *t, const TValue *key);
+#if defined(LUM_DEBUG)
+LUMI_FUNC Node *lumH_mainposition (const Table *t, const TValue *key);
 #endif
 
 

@@ -1,11 +1,11 @@
 /*
 ** $Id: ldump.c $
-** save precompiled Lua chunks
-** See Copyright Notice in lua.h
+** save precompiled Lum chunks
+** See Copyright Notice in lum.h
 */
 
 #define ldump_c
-#define LUA_CORE
+#define LUM_CORE
 
 #include "lprefix.h"
 
@@ -13,7 +13,7 @@
 #include <limits.h>
 #include <stddef.h>
 
-#include "lua.h"
+#include "lum.h"
 
 #include "lapi.h"
 #include "lgc.h"
@@ -24,14 +24,14 @@
 
 
 typedef struct {
-  lua_State *L;
-  lua_Writer writer;
+  lum_State *L;
+  lum_Writer writer;
   void *data;
   size_t offset;  /* current position relative to beginning of dump */
   int strip;
   int status;
   Table *h;  /* table to track saved strings */
-  lua_Integer nstr;  /* counter for counting saved strings */
+  lum_Integer nstr;  /* counter for counting saved strings */
 } DumpState;
 
 
@@ -51,9 +51,9 @@ typedef struct {
 */
 static void dumpBlock (DumpState *D, const void *b, size_t size) {
   if (D->status == 0) {  /* do not write anything after an error */
-    lua_unlock(D->L);
+    lum_unlock(D->L);
     D->status = (*D->writer)(D->L, b, size, D->data);
-    lua_lock(D->L);
+    lum_lock(D->L);
     D->offset += size;
   }
 }
@@ -66,11 +66,11 @@ static void dumpBlock (DumpState *D, const void *b, size_t size) {
 static void dumpAlign (DumpState *D, unsigned align) {
   unsigned padding = align - cast_uint(D->offset % align);
   if (padding < align) {  /* padding == align means no padding */
-    static lua_Integer paddingContent = 0;
-    lua_assert(align <= sizeof(lua_Integer));
+    static lum_Integer paddingContent = 0;
+    lum_assert(align <= sizeof(lum_Integer));
     dumpBlock(D, &paddingContent, padding);
   }
-  lua_assert(D->offset % align == 0);
+  lum_assert(D->offset % align == 0);
 }
 
 
@@ -107,17 +107,17 @@ static void dumpSize (DumpState *D, size_t sz) {
 }
 
 static void dumpInt (DumpState *D, int x) {
-  lua_assert(x >= 0);
+  lum_assert(x >= 0);
   dumpVarint(D, cast(size_t, x));
 }
 
 
-static void dumpNumber (DumpState *D, lua_Number x) {
+static void dumpNumber (DumpState *D, lum_Number x) {
   dumpVar(D, x);
 }
 
 
-static void dumpInteger (DumpState *D, lua_Integer x) {
+static void dumpInteger (DumpState *D, lum_Integer x) {
   dumpVar(D, x);
 }
 
@@ -134,7 +134,7 @@ static void dumpString (DumpState *D, TString *ts) {
     dumpSize(D, 0);
   else {
     TValue idx;
-    int tag = luaH_getstr(D->h, ts, &idx);
+    int tag = lumH_getstr(D->h, ts, &idx);
     if (!tagisempty(tag)) {  /* string already saved? */
       dumpSize(D, 1);  /* reuse a saved string */
       dumpSize(D, cast_sizet(ivalue(&idx)));  /* index of saved string */
@@ -148,7 +148,7 @@ static void dumpString (DumpState *D, TString *ts) {
       D->nstr++;  /* one more saved string */
       setsvalue(D->L, &key, ts);  /* the string is the key */
       setivalue(&value, D->nstr);  /* its index is the value */
-      luaH_set(D->L, D->h, &key, &value);  /* h[ts] = nstr */
+      lumH_set(D->L, D->h, &key, &value);  /* h[ts] = nstr */
       /* integer value does not need barrier */
     }
   }
@@ -158,7 +158,7 @@ static void dumpString (DumpState *D, TString *ts) {
 static void dumpCode (DumpState *D, const Proto *f) {
   dumpInt(D, f->sizecode);
   dumpAlign(D, sizeof(f->code[0]));
-  lua_assert(f->code != NULL);
+  lum_assert(f->code != NULL);
   dumpVector(D, f->code, cast_uint(f->sizecode));
 }
 
@@ -174,18 +174,18 @@ static void dumpConstants (DumpState *D, const Proto *f) {
     int tt = ttypetag(o);
     dumpByte(D, tt);
     switch (tt) {
-      case LUA_VNUMFLT:
+      case LUM_VNUMFLT:
         dumpNumber(D, fltvalue(o));
         break;
-      case LUA_VNUMINT:
+      case LUM_VNUMINT:
         dumpInteger(D, ivalue(o));
         break;
-      case LUA_VSHRSTR:
-      case LUA_VLNGSTR:
+      case LUM_VSHRSTR:
+      case LUM_VLNGSTR:
         dumpString(D, tsvalue(o));
         break;
       default:
-        lua_assert(tt == LUA_VNIL || tt == LUA_VFALSE || tt == LUA_VTRUE);
+        lum_assert(tt == LUM_VNIL || tt == LUM_VFALSE || tt == LUM_VTRUE);
     }
   }
 }
@@ -254,25 +254,25 @@ static void dumpFunction (DumpState *D, const Proto *f) {
 
 
 static void dumpHeader (DumpState *D) {
-  dumpLiteral(D, LUA_SIGNATURE);
-  dumpByte(D, LUAC_VERSION);
-  dumpByte(D, LUAC_FORMAT);
-  dumpLiteral(D, LUAC_DATA);
+  dumpLiteral(D, LUM_SIGNATURE);
+  dumpByte(D, LUMC_VERSION);
+  dumpByte(D, LUMC_FORMAT);
+  dumpLiteral(D, LUMC_DATA);
   dumpByte(D, sizeof(Instruction));
-  dumpByte(D, sizeof(lua_Integer));
-  dumpByte(D, sizeof(lua_Number));
-  dumpInteger(D, LUAC_INT);
-  dumpNumber(D, LUAC_NUM);
+  dumpByte(D, sizeof(lum_Integer));
+  dumpByte(D, sizeof(lum_Number));
+  dumpInteger(D, LUMC_INT);
+  dumpNumber(D, LUMC_NUM);
 }
 
 
 /*
-** dump Lua function as precompiled chunk
+** dump Lum function as precompiled chunk
 */
-int luaU_dump (lua_State *L, const Proto *f, lua_Writer w, void *data,
+int lumU_dump (lum_State *L, const Proto *f, lum_Writer w, void *data,
                int strip) {
   DumpState D;
-  D.h = luaH_new(L);  /* aux. table to keep strings already dumped */
+  D.h = lumH_new(L);  /* aux. table to keep strings already dumped */
   sethvalue2s(L, L->top.p, D.h);  /* anchor it */
   L->top.p++;
   D.L = L;

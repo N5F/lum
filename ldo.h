@@ -1,7 +1,7 @@
 /*
 ** $Id: ldo.h $
-** Stack and Call structure of Lua
-** See Copyright Notice in lua.h
+** Stack and Call structure of Lum
+** See Copyright Notice in lum.h
 */
 
 #ifndef ldo_h
@@ -29,16 +29,16 @@
 #else
 /* realloc stack keeping its size */
 #define condmovestack(L,pre,pos)  \
-  { int sz_ = stacksize(L); pre; luaD_reallocstack((L), sz_, 0); pos; }
+  { int sz_ = stacksize(L); pre; lumD_reallocstack((L), sz_, 0); pos; }
 #endif
 
-#define luaD_checkstackaux(L,n,pre,pos)  \
+#define lumD_checkstackaux(L,n,pre,pos)  \
 	if (l_unlikely(L->stack_last.p - L->top.p <= (n))) \
-	  { pre; luaD_growstack(L, n, 1); pos; } \
+	  { pre; lumD_growstack(L, n, 1); pos; } \
 	else { condmovestack(L,pre,pos); }
 
 /* In general, 'pre'/'pos' are empty (nothing to save) */
-#define luaD_checkstack(L,n)	luaD_checkstackaux(L,n,(void)0,(void)0)
+#define lumD_checkstack(L,n)	lumD_checkstackaux(L,n,(void)0,(void)0)
 
 
 
@@ -48,7 +48,7 @@
 
 /* macro to check stack size, preserving 'p' */
 #define checkstackp(L,n,p)  \
-  luaD_checkstackaux(L, n, \
+  lumD_checkstackaux(L, n, \
     ptrdiff_t t__ = savestack(L, p),  /* save 'p' */ \
     p = restorestack(L, t__))  /* 'pos' part: restore 'p' */
 
@@ -59,38 +59,38 @@
 ** fit in a 16-bit unsigned integer. It must also be compatible with
 ** the size of the C stack.)
 */
-#if !defined(LUAI_MAXCCALLS)
-#define LUAI_MAXCCALLS		200
+#if !defined(LUMI_MAXCCALLS)
+#define LUMI_MAXCCALLS		200
 #endif
 
 
 /* type of protected functions, to be ran by 'runprotected' */
-typedef void (*Pfunc) (lua_State *L, void *ud);
+typedef void (*Pfunc) (lum_State *L, void *ud);
 
-LUAI_FUNC void luaD_seterrorobj (lua_State *L, TStatus errcode, StkId oldtop);
-LUAI_FUNC TStatus luaD_protectedparser (lua_State *L, ZIO *z,
+LUMI_FUNC void lumD_seterrorobj (lum_State *L, TStatus errcode, StkId oldtop);
+LUMI_FUNC TStatus lumD_protectedparser (lum_State *L, ZIO *z,
                                                   const char *name,
                                                   const char *mode);
-LUAI_FUNC void luaD_hook (lua_State *L, int event, int line,
+LUMI_FUNC void lumD_hook (lum_State *L, int event, int line,
                                         int fTransfer, int nTransfer);
-LUAI_FUNC void luaD_hookcall (lua_State *L, CallInfo *ci);
-LUAI_FUNC int luaD_pretailcall (lua_State *L, CallInfo *ci, StkId func,
+LUMI_FUNC void lumD_hookcall (lum_State *L, CallInfo *ci);
+LUMI_FUNC int lumD_pretailcall (lum_State *L, CallInfo *ci, StkId func,
                                               int narg1, int delta);
-LUAI_FUNC CallInfo *luaD_precall (lua_State *L, StkId func, int nResults);
-LUAI_FUNC void luaD_call (lua_State *L, StkId func, int nResults);
-LUAI_FUNC void luaD_callnoyield (lua_State *L, StkId func, int nResults);
-LUAI_FUNC TStatus luaD_closeprotected (lua_State *L, ptrdiff_t level,
+LUMI_FUNC CallInfo *lumD_precall (lum_State *L, StkId func, int nResults);
+LUMI_FUNC void lumD_call (lum_State *L, StkId func, int nResults);
+LUMI_FUNC void lumD_callnoyield (lum_State *L, StkId func, int nResults);
+LUMI_FUNC TStatus lumD_closeprotected (lum_State *L, ptrdiff_t level,
                                                      TStatus status);
-LUAI_FUNC TStatus luaD_pcall (lua_State *L, Pfunc func, void *u,
+LUMI_FUNC TStatus lumD_pcall (lum_State *L, Pfunc func, void *u,
                                         ptrdiff_t oldtop, ptrdiff_t ef);
-LUAI_FUNC void luaD_poscall (lua_State *L, CallInfo *ci, int nres);
-LUAI_FUNC int luaD_reallocstack (lua_State *L, int newsize, int raiseerror);
-LUAI_FUNC int luaD_growstack (lua_State *L, int n, int raiseerror);
-LUAI_FUNC void luaD_shrinkstack (lua_State *L);
-LUAI_FUNC void luaD_inctop (lua_State *L);
+LUMI_FUNC void lumD_poscall (lum_State *L, CallInfo *ci, int nres);
+LUMI_FUNC int lumD_reallocstack (lum_State *L, int newsize, int raiseerror);
+LUMI_FUNC int lumD_growstack (lum_State *L, int n, int raiseerror);
+LUMI_FUNC void lumD_shrinkstack (lum_State *L);
+LUMI_FUNC void lumD_inctop (lum_State *L);
 
-LUAI_FUNC l_noret luaD_throw (lua_State *L, TStatus errcode);
-LUAI_FUNC TStatus luaD_rawrunprotected (lua_State *L, Pfunc f, void *ud);
+LUMI_FUNC l_noret lumD_throw (lum_State *L, TStatus errcode);
+LUMI_FUNC TStatus lumD_rawrunprotected (lum_State *L, Pfunc f, void *ud);
 
 #endif
 

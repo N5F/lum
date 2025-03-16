@@ -1,10 +1,10 @@
-#include "lua.h"
+#include "lum.h"
 
 
-int luaopen_lib2 (lua_State *L);
+int lumopen_lib2 (lum_State *L);
 
-LUAMOD_API int luaopen_lib21 (lua_State *L) {
-  return luaopen_lib2(L);
+LUMMOD_API int lumopen_lib21 (lum_State *L) {
+  return lumopen_lib2(L);
 }
 
 

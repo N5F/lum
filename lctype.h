@@ -1,35 +1,35 @@
 /*
 ** $Id: lctype.h $
-** 'ctype' functions for Lua
-** See Copyright Notice in lua.h
+** 'ctype' functions for Lum
+** See Copyright Notice in lum.h
 */
 
 #ifndef lctype_h
 #define lctype_h
 
-#include "lua.h"
+#include "lum.h"
 
 
 /*
 ** WARNING: the functions defined here do not necessarily correspond
 ** to the similar functions in the standard C ctype.h. They are
-** optimized for the specific needs of Lua.
+** optimized for the specific needs of Lum.
 */
 
-#if !defined(LUA_USE_CTYPE)
+#if !defined(LUM_USE_CTYPE)
 
 #if 'A' == 65 && '0' == 48
 /* ASCII case: can use its own tables; faster and fixed */
-#define LUA_USE_CTYPE	0
+#define LUM_USE_CTYPE	0
 #else
 /* must use standard C ctype */
-#define LUA_USE_CTYPE	1
+#define LUM_USE_CTYPE	1
 #endif
 
 #endif
 
 
-#if !LUA_USE_CTYPE	/* { */
+#if !LUM_USE_CTYPE	/* { */
 
 #include <limits.h>
 
@@ -49,10 +49,10 @@
 /*
 ** add 1 to char to allow index -1 (EOZ)
 */
-#define testprop(c,p)	(luai_ctype_[(c)+1] & (p))
+#define testprop(c,p)	(lumi_ctype_[(c)+1] & (p))
 
 /*
-** 'lalpha' (Lua alphabetic) and 'lalnum' (Lua alphanumeric) both include '_'
+** 'lalpha' (Lum alphabetic) and 'lalnum' (Lum alphanumeric) both include '_'
 */
 #define lislalpha(c)	testprop(c, MASK(ALPHABIT))
 #define lislalnum(c)	testprop(c, (MASK(ALPHABIT) | MASK(DIGITBIT)))
@@ -64,7 +64,7 @@
 
 /*
 ** In ASCII, this 'ltolower' is correct for alphabetic characters and
-** for '.'. That is enough for Lua needs. ('check_exp' ensures that
+** for '.'. That is enough for Lum needs. ('check_exp' ensures that
 ** the character either is an upper-case letter or is unchanged by
 ** the transformation, which holds for lower-case letters and '.'.)
 */
@@ -74,7 +74,7 @@
 
 
 /* one entry for each character and for -1 (EOZ) */
-LUAI_DDEC(const lu_byte luai_ctype_[UCHAR_MAX + 2];)
+LUMI_DDEC(const lu_byte lumi_ctype_[UCHAR_MAX + 2];)
 
 
 #else			/* }{ */
