@@ -72,7 +72,7 @@ LOCAL = $(TESTS) $(CWARNS)
 # For C89, "-std=c89 -DLUM_USE_C89"
 # Note that Linux/Posix options are not compatible with C89
 MYCFLAGS= $(LOCAL) -std=c99 -DLUM_USE_LINUX
-MYLDFLAGS= $(LOCAL) -Wl,-E
+MYLDFLAGS= $(LOCAL) -Wl
 MYLIBS= -ldl
 
 
